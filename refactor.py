@@ -1,49 +1,59 @@
 import sys
 from pathlib import Path
 
+class ComputeStatistics:
+    def __init__(self, filename):
+        """Initialize with file path and load data once."""
+        self.filename = filename
+        self.data = self._read_ints()
 
-def compute_stats(filename):
-    """
-    Read numbers from a file and compute statistics.
+    def _read_ints(self):
+        """Read integers from file and return as list."""
+        try:
+            return [int(line.strip()) for line in Path(self.filename).read_text().splitlines() if line.strip()]
+        except FileNotFoundError:
+            print(f"Error: File '{self.filename}' not found")
+            return []
+        except ValueError as e:
+            print(f"Error: Invalid number format in file - {e}")
+            return []
 
-    Args:
-        filename: Path to the file containing numbers (one per line)
+    def count(self):
+        return len(self.data)
 
-    Returns:
-        dict: Statistics dictionary with keys: total, summation, average, minimum, maximum
-              Returns None if no valid data found
-    """
-    try:
-        numbers = [int(line.strip()) for line in Path(filename).read_text().splitlines() if line.strip()]
+    def summation(self):
+        return sum(self.data)
 
-        if not numbers:
-            print("No data found in file")
+    def average(self):
+        return round(sum(self.data) / len(self.data), 2) if self.data else 0
+
+    def minimum(self):
+        return min(self.data) if self.data else None
+
+    def maximum(self):
+        return max(self.data) if self.data else None
+
+    def stats(self):
+        """Return all statistics in a dictionary."""
+        if not self.data:
             return None
-
-        stats = {
-            "total": len(numbers),
-            "summation": sum(numbers),
-            "average": round(sum(numbers) / len(numbers), 2),
-            "minimum": min(numbers),
-            "maximum": max(numbers),
+        return {
+            "total": self.count(),
+            "summation": self.summation(),
+            "average": self.average(),
+            "minimum": self.minimum(),
+            "maximum": self.maximum,
         }
-
-        # Print with consistent formatting
-        for key, value in stats.items():
-            print(f"{key} = {value}")
-
-        return stats
-
-    except FileNotFoundError:
-        print(f"Error: File '{filename}' not found")
-    except ValueError as e:
-        print(f"Error: Invalid number format in file - {e}")
-    except Exception as e:
-        print(f"Error: {e}")
-
-    return None
 
 
 if __name__ == "__main__":
     filename = sys.argv[1] if len(sys.argv) > 1 else "random_nums.txt"
-    compute_stats(filename)
+    cs = ComputeStatistics(filename)
+
+    if cs.data:
+        print("The values are:", cs.data)
+        print("Total values in file are:", cs.count())
+        print("Summation of data is:", cs.summation())
+        print("Average of data is:", cs.average())
+        print("Minimum value from data is:", cs.minimum())
+        print("Maximum value from data is:", cs.maximum())
